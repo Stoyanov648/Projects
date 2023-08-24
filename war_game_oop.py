@@ -58,9 +58,14 @@ class Player:
 
     def remove_war_cards(self):
         war_cards = []
+        # when the cards left in hand are 3 or less the index ot table_card[5][1] is crashing the program
+        # that's why in such case the function returns tuple of 404s
+        # once it returns them the program does a quick chech and if 404s are found on the table
+        # The one who drops them will be disqualified due to no more cards to continue.
         if len(self.hand.cards) < 3:
             global disqualified
             disqualified = self.name
+
             return (404,404,404,404,404,404)
         else:
             for x in range(3):
@@ -75,15 +80,20 @@ class Player:
 
 
 def end_stats():
+    """
+    This function will be used only in case of gameover to print
+    the result statisctics.
+    """
     print(f"Game over, number of rounds: {str(total_rounds)}")
     print(f"a War happened {str(war_count)} times")
     print(f"a War DRAW happened {str(war_draw)} times")
-    if pc.still_has_cards():
+    if len(pc.hand.cards) > len(player.hand.cards):
 
         print(f"{pc.name} Wins")
     else:
 
         print(f"{player.name} WINS")
+
 
 # GAMEPLAY
 # Creating a deck, shuffle and split
@@ -101,6 +111,9 @@ next_start = ''
 total_rounds = 0
 war_count = 0
 war_draw = 0
+# Starting a while loop which will end only in 2 scenarios
+# 1 when one of the players lose all his cards
+# 2 in case of a war if a player doesn't have enough cards to continue the battle
 while player.still_has_cards() and pc.still_has_cards():
 
     total_rounds += 1
@@ -112,6 +125,9 @@ while player.still_has_cards() and pc.still_has_cards():
     print('\n')
 
     table_cards = []
+    # by default the Computer starts the game
+    # in the end of every round the Winner becomes the one who starts the next round.
+    # The code bellow is only conditions set by me or by the game rules.
     if next_start == 'human':
         human = True
         computer = False
@@ -127,7 +143,7 @@ while player.still_has_cards() and pc.still_has_cards():
 
         table_cards.append(pc_card)
         table_cards.append(player_card)
-    if pc_card[1] == player_card[1]:
+    if pc_card[1] == player_card[1]: # line 144 - 177 is only in case of WAR condition
         war_count += 1
         print("War!")
 
@@ -137,13 +153,12 @@ while player.still_has_cards() and pc.still_has_cards():
             print(f"{disqualified} LOST! Not enough cards to continue the BATTLE!")
             end_stats()
             exit()
-        # when the cards left in hand are 3 or less the index ot table_card[5][1] is crashing the program
         elif table_cards[2][1] == table_cards[5][1]:
             print("War DRAW")
             print("In case of WAR DRAW both sides looses table cards")
             war_draw += 1
             continue
-        if computer:
+        if computer: # is the one who starts THEN:
             if RANKS.index(table_cards[2][1]) < RANKS.index(table_cards[5][1]):
                 player.hand.add(table_cards)
                 print(f"{player.name} WINS the round")
@@ -152,7 +167,7 @@ while player.still_has_cards() and pc.still_has_cards():
                 pc.hand.add(table_cards)
                 print(f"{pc.name} WINS the round")
                 next_start = 'pc'
-        elif human:
+        elif human: # but if the Human was the one who started THEN:
             if RANKS.index(table_cards[2][1]) > RANKS.index(table_cards[5][1]):
                 player.hand.add(table_cards)
                 print(f"{player.name} WINS the round")
@@ -162,7 +177,7 @@ while player.still_has_cards() and pc.still_has_cards():
                 print(f"{pc.name} WINS the round")
                 next_start = 'pc'
     else:
-        if computer:
+        if computer: # is the one who starts THEN:
             if RANKS.index(table_cards[0][1]) < RANKS.index(table_cards[1][1]):
                 player.hand.add(table_cards)
                 print(f"{player.name} WINS the round")
@@ -171,7 +186,7 @@ while player.still_has_cards() and pc.still_has_cards():
                 pc.hand.add(table_cards)
                 print(f"{pc.name} WINS the round")
                 next_start = 'pc'
-        elif human:
+        elif human: # but if the Human was the one who started THEN:
             if RANKS.index(table_cards[0][1]) > RANKS.index(table_cards[1][1]):
                 player.hand.add(table_cards)
                 print(f"{player.name} WINS the round")
